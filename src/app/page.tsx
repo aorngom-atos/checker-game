@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import { Piece } from './models/piece';
 import Checkerboard from './checkboard';
+import {
+  recordMove,
+  hasPlayedFiveTurnsEach,
+  analyzeMoveHistory,
+  resetMoveHistory,
+  getMoveHistory,
+} from './models/moveHistory'; 
+
 
 interface SelectedPiece {
   piece: Piece;
@@ -97,6 +105,12 @@ export default function Home() {
     setSelected(null);
     setJoueurActif(joueurActif === Piece.Noir ? Piece.Blanc : Piece.Noir);
     setBoard(newboard);
+    recordMove(depuisI, depuisJ, i, j, joueurActif);
+    if (hasPlayedFiveTurnsEach()) {
+      const analyse = analyzeMoveHistory();
+      console.log("Analyse IA après 5 coups chacun :", analyse);
+    }
+    
     isGameOver(newboard);
   };
 
@@ -314,7 +328,7 @@ export default function Home() {
       console.log('Game over.');
     }
   };
-
+  
   return (
     <div
       style={{
