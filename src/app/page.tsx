@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Piece } from './models/piece';
 import Checkerboard from './checkboard';
+import { isValidMove } from './models/moveHistory';
+import { PIECE_DIRECTIONS } from "./models/moveHistory"; // imaginons que tu l'as extrait ici
 
 // Types
 type Position = {
@@ -26,41 +28,7 @@ type Board = Piece[][];
 const BOARD_SIZE = 8;
 const INITIAL_PIECES_ROWS = 3;
 
-const PIECE_DIRECTIONS: Record<Piece, Direction[]> = {
-  [Piece.Noir]: [
-    { row: 1, col: -1 },
-    { row: 1, col: 1 },
-    { row: 2, col: -2 },
-    { row: 2, col: 2 },
-  ],
-  [Piece.Blanc]: [
-    { row: -1, col: -1 },
-    { row: -1, col: 1 },
-    { row: -2, col: -2 },
-    { row: -2, col: 2 },
-  ],
-  [Piece.RoiNoir]: [
-    { row: 1, col: -1 },
-    { row: 1, col: 1 },
-    { row: -1, col: -1 },
-    { row: -1, col: 1 },
-    { row: 2, col: -2 },
-    { row: 2, col: 2 },
-    { row: -2, col: -2 },
-    { row: -2, col: 2 },
-  ],
-  [Piece.RoiBlanc]: [
-    { row: 1, col: -1 },
-    { row: 1, col: 1 },
-    { row: -1, col: -1 },
-    { row: -1, col: 1 },
-    { row: 2, col: -2 },
-    { row: 2, col: 2 },
-    { row: -2, col: -2 },
-    { row: -2, col: 2 },
-  ],
-  [Piece.Null]: [],
-};
+
 
 export default function Home() {
   const [selected, setSelected] = useState<SelectedPiece | null>(null);
@@ -135,7 +103,7 @@ export default function Home() {
     piece: Piece
   ): Board | null {
     // Validate move
-    if (!isValidMove(fromRow, fromCol, toRow, toCol)) {
+    if (!isValidMove(fromRow, fromCol, toRow, toCol, board)) {
       return null;
     }
 
@@ -153,35 +121,6 @@ export default function Home() {
     newBoard[fromRow][fromCol] = Piece.Null;
 
     return newBoard;
-  }
-
-  function isValidMove(fromRow: number, fromCol: number, toRow: number, toCol: number): boolean {
-    // Check if destination is empty
-    if (board[toRow][toCol] !== Piece.Null) return false;
-
-    const piece = board[fromRow][fromCol];
-    const rowDiff = toRow - fromRow;
-    const colDiff = toCol - fromCol;
-
-    // Validate move direction based on piece type
-    if (piece === Piece.Noir && rowDiff <= 0) return false;
-    if (piece === Piece.Blanc && rowDiff >= 0) return false;
-
-    // Check if move is within bounds
-    if (Math.abs(rowDiff) > 2 || Math.abs(colDiff) > 2) return false;
-    if (Math.abs(rowDiff) !== Math.abs(colDiff)) return false;
-
-    // Handle capture
-    if (Math.abs(rowDiff) === 2) {
-      const capturedRow = (fromRow + toRow) / 2;
-      const capturedCol = (fromCol + toCol) / 2;
-      const capturedPiece = board[capturedRow][capturedCol];
-      
-      if (capturedPiece === Piece.Null) return false;
-      if (getPieceColor(capturedPiece) === getPieceColor(piece)) return false;
-    }
-
-    return true;
   }
 
   function getPieceColor(piece: Piece): Piece.Noir | Piece.Blanc {
@@ -210,7 +149,7 @@ export default function Home() {
           
           if (newRow >= 0 && newRow < BOARD_SIZE && 
               newCol >= 0 && newCol < BOARD_SIZE &&
-              isValidMove(row, col, newRow, newCol)) {
+              isValidMove(row, col, newRow, newCol, board)) {
             if (getPieceColor(piece) === Piece.Noir) canBlackMove = true;
             if (getPieceColor(piece) === Piece.Blanc) canWhiteMove = true;
           }
