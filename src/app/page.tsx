@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Piece } from './models/piece';
 import Checkerboard from './checkboard';
-import { isValidMove } from './models/moveHistory';
-import { PIECE_DIRECTIONS } from "./models/moveHistory"; // imaginons que tu l'as extrait ici
+import { isValidMove, PIECE_DIRECTIONS } from './models/moveHistory';
 
 // Types
 type Position = {
