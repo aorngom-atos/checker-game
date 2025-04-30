@@ -53,6 +53,10 @@ export type Board = Piece[][];
     [Piece.Null]: [],
   };
 
+  const BOARD_SIZE = 8;
+const INITIAL_PIECES_ROWS = 3;
+
+
 //copié depuis page.tsx
 export function isValidMove(fromRow: number, fromCol: number, toRow: number, toCol: number, board: Board): boolean {
   // Check if destination is empty
@@ -104,17 +108,58 @@ export function getPossiblePositions(piece: Piece, position: Direction): Directi
     );
   }
   
+  export function promoteToKing(row: number, piece: Piece): Piece {
+    if (piece === Piece.Noir && row === BOARD_SIZE - 1) return Piece.RoiNoir;
+    if (piece === Piece.Blanc && row === 0) return Piece.RoiBlanc;
+    return piece;
+  }
+
+  export function movePiece(
+    currentBoard: Board,
+    fromRow: number,
+    fromCol: number,
+    toRow: number,
+    toCol: number,
+    piece: Piece
+  ): Board | null {
+    // Validate move
+    if (!isValidMove(fromRow, fromCol, toRow, toCol, currentBoard)) {
+      return null;
+    }
+
+    const newBoard = currentBoard.map(row => [...row]);
+    
+    // Handle capture
+    if (Math.abs(toRow - fromRow) === 2) {
+      const capturedRow = (fromRow + toRow) / 2;
+      const capturedCol = (fromCol + toCol) / 2;
+      newBoard[capturedRow][capturedCol] = Piece.Null;
+    }
+
+    // Move piece
+    newBoard[toRow][toCol] = promoteToKing(toRow, piece);
+    
+    newBoard[fromRow][fromCol] = Piece.Null;
+
+    return newBoard;
+  }
   //un move sur un board
-export function applyMove(board: Board, move: Move): Board {
-  const newBoard = board.map(row => [...row]); // Copie du plateau
-
-  const pieceToMove = newBoard[move.depuisI][move.depuisJ];
-  newBoard[move.i][move.j] = pieceToMove;
-  newBoard[move.depuisI][move.depuisJ] = Piece.Null;
-
-  return newBoard;
-}
-
+  export function applyMove(board: Board, move: Move): Board {
+    const newBoard = board.map(row => [...row]); // Copie du plateau
+  
+    const pieceToMove = newBoard[move.depuisI][move.depuisJ];
+      if (Math.abs(move.i - move.depuisI) === 2) {
+      const capturedRow = (move.depuisI + move.i) / 2;
+      const capturedCol = (move.depuisJ + move.j) / 2;
+      newBoard[capturedRow][capturedCol] = Piece.Null; 
+    }
+  
+    newBoard[move.i][move.j] = promoteToKing(move.i, pieceToMove);
+    newBoard[move.depuisI][move.depuisJ] = Piece.Null;
+  
+    return newBoard;
+  }
+  
 // déplacement: classement pour aider l'ia dans ces prédiction
 export function evaluateBoard(board: Board): number {
   let score = 0;

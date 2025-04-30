@@ -76,6 +76,6 @@ export default function Checkerboard(handleClick: (i: number, j: number) => void
         </div>
       );
     }
-
+    
     return rows;
 }

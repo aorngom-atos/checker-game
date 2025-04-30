@@ -1,17 +1,57 @@
-import { Piece } from"./piece" // pour pouvoir utiliser les différentes pièces
-import { getMoveHistory } from "./moveHistory"; // l'historique des coups joués ici
-//pour permettre à l'ia d'avoir les 5 (noirs et blancs) et pouvoir jouer en fonction de ces 10 mouvements là
-export type Board = Piece[][];
+//node: c'est le plateau jeu
+//depth: nombre d'étapes à prévoir à l'avance
+// maximizingPlayer: boolean (au tour de l'ia ou p)
+//child: un nouveau plateau (l'ancien mis à jour)
+//value: meilleu score qu'on peut obtenir depuis cet état
+//heuristic value of node: le score d'un plateau donné
+import { Board, getAllValidMoves, applyMove, evaluateBoard, Move } from "./moveHistory";
 
-export const getBestMoveAfterAnalysis = (board: Piece[][]): [number, number, number, number] | null => {
-  const history = getMoveHistory();
+export function minimax(board: Board, depth : number, maximizingPlayer : boolean): { score: number, move: Move | null} {
 
-  // normalement minimax est censé être ici après
-  //condition pour vérifier que les 10 mouvements là sont déjà fait avant que l'ia ne commence à analyser (il ne doit pas le faire trop tôt)
-  if (history.length >= 10) {
-    const last = history[history.length - 1]; //dernier mouvement
-    // move au hasard à partir de last (par l'ia)
+  if (depth === 0|| getAllValidMoves(board, maximizingPlayer ? "noir" : "blanc").length === 0)
+    return { score: evaluateBoard(board), move: null}
+
+  if(maximizingPlayer) {
+    let maxEval = -Infinity;
+    let bestMove: Move | null = null
+    const moves = getAllValidMoves(board, "noir");
+    for(const move of moves) {
+      const newboard = applyMove(board, move);
+      const { score} = minimax(newboard, depth - 1, false)
+      if( score > maxEval) {
+        maxEval = score;
+        bestMove = move;
+      }
+    }
+    return {score: maxEval, move: bestMove};
   }
+  else {
+    let miniEval = Infinity;
+    let bestMove: Move | null = null
+    const moves = getAllValidMoves(board, "blanc")
+    for (const move of moves) {
+      const newBoard = applyMove(board, move);
+      const { score } = minimax(newBoard, depth - 1, false)
+      if( score < miniEval) {
+        miniEval = score;
+        bestMove = move;
+      }
+    }
+    return { score: miniEval, move: bestMove};
+  }
+}
 
-  return null;
-};
+
+// Pseudo code minimex, se baser sur ça pour faire l'ia
+/*function minimax(node, depth, maximizingPlayer) is
+    if depth = 0 or node is a terminal node then
+        return the heuristic value of node
+    if maximizingPlayer then
+        value := −∞
+        for each child of node do
+            value := max(value, minimax(child, depth − 1, FALSE))
+    else (* minimizing player *)
+        value := +∞
+        for each child of node do
+            value := min(value, minimax(child, depth − 1, TRUE))
+    return value*/
