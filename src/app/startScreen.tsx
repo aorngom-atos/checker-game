@@ -3,15 +3,15 @@
 import { useState } from 'react';
 
 interface StartScreenProps {
-  onStart: (config: { depth: number; playerColor: 'noir' | 'blanc' }) => void; //le faire passer à page.tsx (composant parent)
+  onStart: (config: { depth: number; playerColor: 'noir' | 'blanc', aiVsAi: boolean }) => void; //le faire passer à page.tsx (composant parent)
 }
 
 export default function StartScreen({ onStart }: Readonly<StartScreenProps>) {
   const [depth, setDepth] = useState(3); // difficulté par défaut
   const [playerColor, setPlayerColor] = useState<'noir' | 'blanc'>('blanc');
-
+  const [aiVsAi, setAiVsAi] = useState(false); // IA contre IA
   const handleStart = () => {
-    onStart({ depth, playerColor });
+    onStart({ depth, playerColor, aiVsAi });
   };
 
   return (
@@ -48,6 +48,17 @@ export default function StartScreen({ onStart }: Readonly<StartScreenProps>) {
         </select>
       </div>
 
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={aiVsAi}
+            onChange={(e) => setAiVsAi(e.target.checked)}
+          />
+          Mode IA contre IA
+        </label>
+      </div>
+      
       <button onClick={handleStart} style={{ padding: '10px 20px', fontSize: '16px' }}>
         Commencer le jeu
       </button>

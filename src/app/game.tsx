@@ -27,9 +27,12 @@ type Board = Piece[][];
 const BOARD_SIZE = 8;
 const INITIAL_PIECES_ROWS = 3;
 
-
-
-export default function Home({ depth, playerColor }: Readonly<{ depth: number; playerColor: 'noir' | 'blanc' }>) {
+export default function Home({
+    depth,
+    playerColor,
+    aiVsAi, 
+  }: Readonly<{ depth: number; playerColor: 'noir' | 'blanc'; aiVsAi: boolean }>) 
+  {
   const [selected, setSelected] = useState<SelectedPiece | null>(null);
   const [activePlayer, setActivePlayer] = useState<Piece.Noir | Piece.Blanc>(
     playerColor === 'noir' ? Piece.Noir : Piece.Blanc
@@ -66,20 +69,20 @@ export default function Home({ depth, playerColor }: Readonly<{ depth: number; p
 
 
   useEffect(()=> {
-    if (iaColor === 'noir') {
+    if (aiVsAi){
+        playIaVsIa(board, Piece.Noir)
+    } else if (iaColor === 'noir'){
         iaMove(board);
       }
   }, [])
  
   function iaMove(board: Board) {
     const move = minimax(board, depth, iaColor === 'noir');
-    setTimeout(() => {
         if (move.move) {
         const newBoard = applyMove(board, move.move);
         setBoard(newBoard);
         setActivePlayer(iaColor === 'noir' ? Piece.Blanc : Piece.Noir);
     }
-    }, 1000);
   }
 
    function handleClick(row: number, col: number) {
@@ -118,9 +121,7 @@ export default function Home({ depth, playerColor }: Readonly<{ depth: number; p
        setSelected(null);
      }
    }
- 
- 
- 
+
    function getPieceColor(piece: Piece): Piece.Noir | Piece.Blanc {
      return piece.includes(Piece.Noir) ? Piece.Noir : Piece.Blanc;
    }
@@ -156,15 +157,38 @@ export default function Home({ depth, playerColor }: Readonly<{ depth: number; p
    }
 
    function restartGame() {
+    if (aiVsAi) return;
     const initialBoard = initializeBoard(); 
     setBoard(initialBoard);
     setGameOver(false);
     setSelected(null);
     setActivePlayer(playerColor === 'noir' ? Piece.Noir : Piece.Blanc);
   
-    if (iaColor === 'noir') {
+    if (aiVsAi) {
+        setTimeout(() => {
+          playIaVsIa(initialBoard, Piece.Noir);
+        }, 1000);
+      } else if (iaColor === 'noir') {
+        setTimeout(() => {
+          iaMove(initialBoard);
+        }, 1000);
+      }
+      
+  }
+  
+  function playIaVsIa(currentBoard: Board, currentPlayer: Piece.Noir | Piece.Blanc) {
+    if (gameOver) return;
+  
+    const iaJoueNoir = currentPlayer === Piece.Noir;
+    const move = minimax(currentBoard, depth, iaJoueNoir);
+  
+    if (move.move) {
+      const newBoard = applyMove(currentBoard, move.move);
+      setBoard(newBoard);
+      setActivePlayer(iaJoueNoir ? Piece.Blanc : Piece.Noir);
+  
       setTimeout(() => {
-        iaMove(initialBoard);
+        playIaVsIa(newBoard, iaJoueNoir ? Piece.Blanc : Piece.Noir);
       }, 1000);
     }
   }

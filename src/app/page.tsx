@@ -8,6 +8,7 @@ export default function Page() {
   const [started, setStarted] = useState(false);
   const [depth, setDepth] = useState<number>(3);
   const [playerColor, setPlayerColor] = useState<'noir' | 'blanc'>('blanc');
+  const [aiVsAi, setAiVsAi] = useState(false); 
 
   if (!started) {
     return (
@@ -15,11 +16,12 @@ export default function Page() {
         onStart={({ depth, playerColor }) => {
           setDepth(depth);
           setPlayerColor(playerColor);
+          setAiVsAi(aiVsAi);
           setStarted(true);
         }}
       />
     );
   }
 
-  return <Game depth={depth} playerColor={playerColor} />;
+  return <Game depth={depth} playerColor={playerColor}  aiVsAi={aiVsAi} />;
 }
