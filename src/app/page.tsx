@@ -13,7 +13,7 @@ export default function Page() {
   if (!started) {
     return (
       <StartScreen
-        onStart={({ depth, playerColor }) => {
+        onStart={({ depth, playerColor, aiVsAi }) => {
           setDepth(depth);
           setPlayerColor(playerColor);
           setAiVsAi(aiVsAi);

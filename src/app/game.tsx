@@ -189,7 +189,7 @@ export default function Home({
   
       setTimeout(() => {
         playIaVsIa(newBoard, iaJoueNoir ? Piece.Blanc : Piece.Noir);
-      }, 1000);
+      }, 1500);
     }
   }
   
